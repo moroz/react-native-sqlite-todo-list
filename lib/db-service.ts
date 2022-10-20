@@ -56,3 +56,9 @@ export const deleteTodoItem = (db: SQLiteDatabase, id: number) => {
 export const dropTable = async (db: SQLiteDatabase) => {
   return db.executeSql(`drop table ${tableName}`);
 };
+
+export const addTodoItem = async (db: SQLiteDatabase, value: string) => {
+  const insertQuery = `insert into ${tableName} (value) values ('${value}')`;
+
+  return db.executeSql(insertQuery);
+};

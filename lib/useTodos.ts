@@ -1,7 +1,7 @@
 import { ToDoItem } from "@models";
 import { useCallback, useEffect, useState } from "react";
 import { SQLiteDatabase } from "react-native-sqlite-storage";
-import { getTodoItems } from "./db-service";
+import { addTodoItem, getTodoItems } from "./db-service";
 import { seedData } from "./initialData";
 
 export default function (db: SQLiteDatabase | null) {
@@ -22,7 +22,18 @@ export default function (db: SQLiteDatabase | null) {
     if (!db) return;
     const data = await getTodoItems(db);
     setTodos(data);
-  }, []);
+  }, [setTodos, db]);
+
+  const addTodo = useCallback(
+    async (value: string) => {
+      if (!value.trim() || !db) return;
+
+      const result = await addTodoItem(db, value);
+      console.log(result);
+      refetch();
+    },
+    [refetch, db]
+  );
 
   useEffect(() => {
     loadDataCallback();
@@ -30,6 +41,7 @@ export default function (db: SQLiteDatabase | null) {
 
   return {
     todos,
-    refetch
+    refetch,
+    addTodo
   };
 }

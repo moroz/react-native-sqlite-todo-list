@@ -27,7 +27,7 @@ import TodoList from "./components/TodoList";
 
 const App = () => {
   const db = useDbConnection();
-  const { todos, refetch } = useTodos(db);
+  const { todos, addTodo } = useTodos(db);
 
   const isDarkMode = useColorScheme() === "dark";
 
@@ -39,7 +39,7 @@ const App = () => {
     <DBContext.Provider value={db}>
       <SafeAreaView style={[styles.container, backgroundStyle]}>
         <View style={styles.container}>
-          <NewTodoForm refetch={refetch} />
+          <NewTodoForm onAdd={addTodo} />
           <TodoList todos={todos} />
         </View>
       </SafeAreaView>
