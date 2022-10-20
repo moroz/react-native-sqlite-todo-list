@@ -6,11 +6,16 @@ interface Props {
   todos: ToDoItem[];
 }
 
+const ItemSeparatorComponent = () => {
+  return <View style={styles.separator} />;
+};
+
 const TodoList: React.FC<Props> = ({ todos }) => {
   return (
     <View style={styles.root}>
       <FlatList
         data={todos}
+        ItemSeparatorComponent={ItemSeparatorComponent}
         renderItem={({ item }) => <Text style={styles.item}>{item.value}</Text>}
       />
     </View>
@@ -22,10 +27,15 @@ const styles = StyleSheet.create({
     flex: 1
   },
   item: {
+    color: "black",
     backgroundColor: "white",
     height: 40,
     lineHeight: 40,
     paddingHorizontal: 16
+  },
+  separator: {
+    height: 2,
+    width: "100%"
   }
 });
 
