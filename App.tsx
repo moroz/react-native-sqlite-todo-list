@@ -8,54 +8,26 @@
  * @format
  */
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React from "react";
 import {
   FlatList,
-  ListView,
   SafeAreaView,
   StyleSheet,
   Text,
-  TextInput,
-  TextInputComponent,
   useColorScheme,
   View
 } from "react-native";
-import { SQLiteDatabase } from "react-native-sqlite-storage";
 
 import { Colors } from "react-native/Libraries/NewAppScreen";
-import {
-  createTable,
-  getDBConnection,
-  getTodoItems,
-  saveTodoItems
-} from "./lib/db-service";
-import { ToDoItem } from "./models/todos";
+import useDbConnection from "./lib/useDbConnection";
+import DBContext from "./lib/DBContext";
+import NewTodoForm from "./components/NewTodoForm";
+import useTodos from "./lib/useTodos";
+import TodoList from "./components/TodoList";
 
 const App = () => {
-  const db = useRef<SQLiteDatabase | null>(null);
-  const [todos, setTodos] = useState<ToDoItem[]>([]);
-  const [newTodo, setNewTodo] = useState("");
-
-  const loadDataCallback = useCallback(async () => {
-    try {
-      const initTodos = [{ id: 0, value: "go to the shop" }];
-      db.current = await getDBConnection();
-      await createTable(db.current);
-      const storedTodoItems = await getTodoItems(db.current);
-      if (storedTodoItems.length) {
-        setTodos(storedTodoItems);
-      } else {
-        await saveTodoItems(db.current, initTodos);
-        setTodos(initTodos);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadDataCallback();
-  }, []);
+  const db = useDbConnection();
+  const { todos, refetch } = useTodos(db);
 
   const isDarkMode = useColorScheme() === "dark";
 
@@ -64,25 +36,14 @@ const App = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, backgroundStyle]}>
-      <View style={styles.container}>
-        <View style={styles.form}>
-          <TextInput
-            value={newTodo}
-            style={styles.input}
-            onChangeText={setNewTodo}
-          />
+    <DBContext.Provider value={db}>
+      <SafeAreaView style={[styles.container, backgroundStyle]}>
+        <View style={styles.container}>
+          <NewTodoForm refetch={refetch} />
+          <TodoList todos={todos} />
         </View>
-        <View style={styles.list}>
-          <FlatList
-            data={todos}
-            renderItem={({ item }) => (
-              <Text style={styles.item}>{item.value}</Text>
-            )}
-          />
-        </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </DBContext.Provider>
   );
 };
 
@@ -106,13 +67,7 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     flexDirection: "row"
   },
-  input: {
-    backgroundColor: "white",
-    borderStyle: "solid",
-    borderColor: "blue",
-    borderWidth: 2,
-    margin: 16
-  }
+  input: {}
 });
 
 export default App;
