@@ -10,9 +10,13 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  FlatList,
+  ListView,
   SafeAreaView,
   StyleSheet,
   Text,
+  TextInput,
+  TextInputComponent,
   useColorScheme,
   View
 } from "react-native";
@@ -30,6 +34,7 @@ import { ToDoItem } from "./models/todos";
 const App = () => {
   const db = useRef<SQLiteDatabase | null>(null);
   const [todos, setTodos] = useState<ToDoItem[]>([]);
+  const [newTodo, setNewTodo] = useState("");
 
   const loadDataCallback = useCallback(async () => {
     try {
@@ -59,13 +64,22 @@ const App = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, backgroundStyle]}>
       <View style={styles.container}>
-        <View style={styles.text}>
-          <Text>{JSON.stringify(todos)}</Text>
+        <View style={styles.form}>
+          <TextInput
+            value={newTodo}
+            style={styles.input}
+            onChangeText={setNewTodo}
+          />
         </View>
-        <View style={styles.text2}>
-          <Text>{JSON.stringify(todos)}</Text>
+        <View style={styles.list}>
+          <FlatList
+            data={todos}
+            renderItem={({ item }) => (
+              <Text style={styles.item}>{item.value}</Text>
+            )}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -77,13 +91,27 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1
   },
-  text: {
+  list: {
     flex: 1,
-    backgroundColor: "red"
+    backgroundColor: "salmon"
   },
-  text2: {
-    flex: 2,
-    backgroundColor: "blue"
+  form: {
+    height: 80
+  },
+  item: {
+    height: 40,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "red",
+    flexDirection: "row"
+  },
+  input: {
+    backgroundColor: "white",
+    borderStyle: "solid",
+    borderColor: "blue",
+    borderWidth: 2,
+    margin: 16
   }
 });
 
