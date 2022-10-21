@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import React
 
+@objc(RNShare)
 class RNShare : NSObject {
   @objc static func requiresMainQueueSetup() -> Bool {
     return false
@@ -34,7 +35,7 @@ class RNShare : NSObject {
     }
     
     let controller = RCTPresentedViewController()
-    let shareController = UIActivityViewController(activityItems: ["Hello React Native"], applicationActivities: nil)
+    let shareController = UIActivityViewController(activityItems: items, applicationActivities: nil)
     
     shareController.popoverPresentationController?.sourceView = controller?.view
     

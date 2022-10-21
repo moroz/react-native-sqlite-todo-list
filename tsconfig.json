@@ -4,7 +4,8 @@
     "skipLibCheck": true,
     "paths": {
       "@models": ["./models"],
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@lib/*": ["./lib/*"]
     }
   }
 }
