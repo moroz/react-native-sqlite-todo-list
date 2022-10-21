@@ -18,6 +18,7 @@ export const getDBConnection = () => {
  */
 export const createTable = async (db: SQLiteDatabase) => {
   const query = `CREATE TABLE IF NOT EXISTS ${tableName} (
+    id INTEGER PRIMARY KEY,
     value TEXT NOT NULL
   );`;
 
@@ -27,7 +28,7 @@ export const createTable = async (db: SQLiteDatabase) => {
 export const getTodoItems = async (db: SQLiteDatabase): Promise<ToDoItem[]> => {
   try {
     const todoItems: ToDoItem[] = [];
-    const raw = await db.executeSql(`select rowid id, value from ${tableName}`);
+    const raw = await db.executeSql(`select id, value from ${tableName}`);
     raw.forEach((result) => {
       for (let i = 0; i < result.rows.length; i++) {
         todoItems.push(result.rows.item(i));
@@ -41,24 +42,30 @@ export const getTodoItems = async (db: SQLiteDatabase): Promise<ToDoItem[]> => {
 };
 
 export const saveTodoItems = (db: SQLiteDatabase, todoItems: ToDoItem[]) => {
-  const insertQuery =
-    `insert or replace into ${tableName} (rowid, value) values ` +
-    todoItems.map((i) => `(${i.id}, '${i.value}')`).join(",");
+  const params = todoItems.map((_, i) => `($${i + 1})`).join(",");
+  const vars = todoItems.map((item) => item.value);
 
-  return db.executeSql(insertQuery);
+  const insertQuery = `insert into ${tableName} (value) values ${params}`;
+
+  return db.executeSql(insertQuery, vars);
 };
 
 export const deleteTodoItem = (db: SQLiteDatabase, id: number) => {
-  const deleteQuery = `delete from ${tableName} where rowid = ${id}`;
-  return db.executeSql(deleteQuery);
+  const deleteQuery = `delete from ${tableName} where id = $1`;
+  return db.executeSql(deleteQuery, [id]);
 };
 
 export const dropTable = async (db: SQLiteDatabase) => {
   return db.executeSql(`drop table ${tableName}`);
 };
 
-export const addTodoItem = async (db: SQLiteDatabase, value: string) => {
-  const insertQuery = `insert into ${tableName} (value) values ('${value}')`;
+export const addTodoItem = async (
+  db: SQLiteDatabase,
+  value: string
+): Promise<ToDoItem> => {
+  const insertQuery = `insert into ${tableName} (value) values ($1)`;
 
-  return db.executeSql(insertQuery);
+  const result = await db.executeSql(insertQuery, [value]);
+
+  return { id: result[0].insertId, value };
 };

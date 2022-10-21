@@ -8,12 +8,13 @@
  * @format
  */
 
-import React from "react";
+import React, { useCallback } from "react";
 import {
   FlatList,
   SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View
 } from "react-native";
@@ -24,12 +25,19 @@ import DBContext from "./lib/DBContext";
 import NewTodoForm from "./components/NewTodoForm";
 import useTodos from "./lib/useTodos";
 import TodoList from "./components/TodoList";
+import { dropTable } from "./lib/db-service";
 
 const App = () => {
   const db = useDbConnection();
   const { todos, addTodo } = useTodos(db);
 
   const isDarkMode = useColorScheme() === "dark";
+
+  const onDropDatabase = useCallback(async () => {
+    if (!db) return;
+
+    await dropTable(db);
+  }, [db]);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter
@@ -41,6 +49,9 @@ const App = () => {
         <View style={styles.container}>
           <NewTodoForm onAdd={addTodo} />
           <TodoList todos={todos} />
+          <TouchableOpacity onPress={onDropDatabase} style={styles.dropButton}>
+            <Text>Drop table</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </DBContext.Provider>
@@ -67,7 +78,13 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     flexDirection: "row"
   },
-  input: {}
+  dropButton: {
+    textAlign: "center",
+    justifyContent: "center",
+    backgroundColor: "red",
+    margin: 16,
+    padding: 10
+  }
 });
 
 export default App;

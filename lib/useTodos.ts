@@ -8,7 +8,6 @@ export default function (db: SQLiteDatabase | null) {
   const [todos, setTodos] = useState<ToDoItem[]>([]);
 
   const loadDataCallback = useCallback(async () => {
-    console.log(db);
     if (!db) return;
     try {
       const data = await seedData(db);
@@ -28,9 +27,8 @@ export default function (db: SQLiteDatabase | null) {
     async (value: string) => {
       if (!value.trim() || !db) return;
 
-      const result = await addTodoItem(db, value);
-      console.log(result);
-      refetch();
+      const item = await addTodoItem(db, value);
+      setTodos((items) => [...items, item]);
     },
     [refetch, db]
   );
